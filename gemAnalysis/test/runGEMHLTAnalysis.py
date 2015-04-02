@@ -35,5 +35,4 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('file:singleMu2019_HLT.root')
 )
 
-
 process.p = cms.Path(process.gemHLTAnalysis)

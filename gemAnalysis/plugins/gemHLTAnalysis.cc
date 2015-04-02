@@ -34,12 +34,16 @@ private:
 
   edm::InputTag recoMuonInput_;
 
+  int m_ngemHits,m_ntracks,m_ntracksWithGem;
 };
 
 gemHLTAnalysis::gemHLTAnalysis(const edm::ParameterSet& iConfig)
 
 {
   recoMuonInput_ = iConfig.getParameter<edm::InputTag>("recoMuonInput");
+  m_ngemHits = 0;
+  m_ntracks = 0;
+  m_ntracksWithGem = 0;
 }
 
 
@@ -59,31 +63,44 @@ gemHLTAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   
   for (const reco::Track & m: *muons){
-      cout << "m.pt "<< m.pt()
-	   << " gemStationsWithAnyHits "<< m.hitPattern().gemStationsWithAnyHits()
-	   << " cscStationsWithAnyHits "<< m.hitPattern().cscStationsWithAnyHits()
+    m_ntracks++;
+    cout << "m.pt "<< m.pt()
+	 << " gemStationsWithAnyHits "<< m.hitPattern().gemStationsWithAnyHits()
+	 << " cscStationsWithAnyHits "<< m.hitPattern().cscStationsWithAnyHits()
+	 <<endl;
+    bool hasGem = false;
+    for (trackingRecHit_iterator hit = m.recHitsBegin(); hit != m.recHitsEnd(); ++hit) {
+      DetId recoid = (*hit)->geographicalId();
+      cout << " subdetId()  "<< recoid.subdetId() 
 	   <<endl;
+      if (recoid.subdetId() == 4){
+	m_ngemHits++;
+	hasGem = true;
+      }
+      // gem is subdetId == 4
+    }
+    if (hasGem)
+      m_ntracksWithGem++;
   }
   
-  //   for (trackingRecHit_iterator hit = m.recHitsBegin(); hit != m.recHitsEnd(); ++hit) {
-//       // DetId recoid = (*hit)->geographicalId();
-//       // if ( recoid.det() == DetId::Muon ){
+  //       // DetId recoid = (*hit)->geographicalId();
+  //       // if ( recoid.det() == DetId::Muon ){
 	
-//       // rawId
-//       // if((*hit)->isValid()) {
-//       //   // unsigned int id = (*hit)->geographicalId().rawId();
-//       //   // unsigned int subd = id >> (DetId::kSubdetOffset);
+  //       // rawId
+  //       // if((*hit)->isValid()) {
+  //       //   // unsigned int id = (*hit)->geographicalId().rawId();
+  //       //   // unsigned int subd = id >> (DetId::kSubdetOffset);
 
-//       //     //	    DetId recoid = (*hit)->geographicalId();
-//       //   //if ( recoid.det() == DetId::Muon ){
-//       // 	    cout << "m.pt "<< m.pt()
-//       // 	 // << " id "<< id
-//       // 	 // << " subd "<< subd
-//       // 	 <<endl;
-//       // }
-//     }
-//   }
-// }
+  //       //     //	    DetId recoid = (*hit)->geographicalId();
+  //       //   //if ( recoid.det() == DetId::Muon ){
+  //       // 	    cout << "m.pt "<< m.pt()
+  //       // 	 // << " id "<< id
+  //       // 	 // << " subd "<< subd
+  //       // 	 <<endl;
+  //       // }
+  //     }
+  //   }
+  // }
 }
 
 
@@ -97,6 +114,10 @@ gemHLTAnalysis::beginJob()
 void 
 gemHLTAnalysis::endJob() 
 {
+  std::cout << " total tracks        : "<< m_ntracks << std::endl;
+  std::cout << " total gem hits      : "<< m_ngemHits << std::endl;
+  std::cout << " tracks with gem hits: "<< m_ntracksWithGem << std::endl;
+	    
 }
 void
 gemHLTAnalysis::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
