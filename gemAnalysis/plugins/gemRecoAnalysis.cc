@@ -13,6 +13,7 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 #include <DataFormats/DetId/interface/DetId.h>
 #include <DataFormats/MuonDetId/interface/MuonSubdetId.h>
@@ -32,6 +33,7 @@ private:
   virtual void endJob() override;
 
   edm::InputTag recoMuonInput_;
+  int m_ngemHits,m_ntracks,m_ntracksWithGem;
 
 };
 
@@ -39,6 +41,9 @@ gemRecoAnalysis::gemRecoAnalysis(const edm::ParameterSet& iConfig)
 
 {
   recoMuonInput_ = iConfig.getParameter<edm::InputTag>("recoMuonInput");
+  m_ngemHits = 0;
+  m_ntracks = 0;
+  m_ntracksWithGem = 0;
 }
 
 
@@ -58,8 +63,28 @@ gemRecoAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   for (const reco::Muon & m: *muons){
     if (m.isGlobalMuon()){
+      if (fabs(m.eta) < 1.5 ) continue;
+      if (fabs(m.eta) > 2.5 ) continue;
+      
       reco::TrackRef track = m.combinedMuon();
+      m_ntracks++;
 
+      bool hasGem = false;
+      if (track.isNonnull()){
+	for (trackingRecHit_iterator hit = track->recHitsBegin(); hit != track->recHitsEnd(); ++hit) {
+	  DetId recoid = (*hit)->geographicalId();
+	  cout << " subdetId()  "<< recoid.subdetId() 
+	       <<endl;
+	  if (recoid.subdetId() == 4){
+	    m_ngemHits++;
+	    hasGem = true;
+	  }
+	  // gem is subdetId == 4
+	}
+      if (hasGem)
+	m_ntracksWithGem++;
+      }
+      
       cout << "m.pt "<< m.pt()
 	   << " gemStationsWithAnyHits "<< track->hitPattern().gemStationsWithAnyHits()
 	   << " cscStationsWithAnyHits "<< track->hitPattern().cscStationsWithAnyHits()
@@ -99,6 +124,9 @@ gemRecoAnalysis::beginJob()
 void 
 gemRecoAnalysis::endJob() 
 {
+  std::cout << " total tracks        : "<< m_ntracks << std::endl;
+  std::cout << " total gem hits      : "<< m_ngemHits << std::endl;
+  std::cout << " tracks with gem hits: "<< m_ntracksWithGem << std::endl;
 }
 void
 gemRecoAnalysis::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {

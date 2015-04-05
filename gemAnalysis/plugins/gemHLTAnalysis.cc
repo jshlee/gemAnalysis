@@ -63,6 +63,8 @@ gemHLTAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   
   for (const reco::Track & m: *muons){
+    if (fabs(m.eta()) < 1.5 ) continue;
+    if (fabs(m.eta()) > 2.5 ) continue;
     m_ntracks++;
     cout << "m.pt "<< m.pt()
 	 << " gemStationsWithAnyHits "<< m.hitPattern().gemStationsWithAnyHits()

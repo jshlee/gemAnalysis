@@ -1,3 +1,4 @@
+
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("GEMRECOANA")
@@ -31,7 +32,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
 process.source = cms.Source("PoolSource",
-  fileNames = cms.untracked.vstring('file:/pnfs/user/jlee/datagem/crab_h2mu_ggh_M125GeV_14TeV_2023WithGem_PU50/results/h2mu_ggh_M125GeV_14TeV_2023WithGem_PU50_189.root')
+  fileNames = cms.untracked.vstring('file:h2mu_ggh_M125GeV_14TeV_2023WithGem_PU0.root')
 )
 
 
