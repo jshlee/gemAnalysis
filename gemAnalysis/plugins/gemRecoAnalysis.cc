@@ -63,8 +63,8 @@ gemRecoAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   for (const reco::Muon & m: *muons){
     if (m.isGlobalMuon()){
-      if (fabs(m.eta) < 1.5 ) continue;
-      if (fabs(m.eta) > 2.5 ) continue;
+      if (fabs(m.eta()) < 1.5 ) continue;
+      if (fabs(m.eta()) > 2.5 ) continue;
       
       reco::TrackRef track = m.combinedMuon();
       m_ntracks++;
@@ -81,8 +81,8 @@ gemRecoAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	  }
 	  // gem is subdetId == 4
 	}
-      if (hasGem)
-	m_ntracksWithGem++;
+	if (hasGem)
+	  m_ntracksWithGem++;
       }
       
       cout << "m.pt "<< m.pt()

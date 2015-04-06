@@ -27,12 +27,14 @@ if detectorVer == 1:
 process.gemHLTAnalysis = cms.EDAnalyzer("gemHLTAnalysis",
     recoMuonInput = cms.InputTag("hltL2Muons")
     #recoMuonInput = cms.InputTag("standAloneMuons")
+    #recoMuonInput = cms.InputTag("refittedStandAloneMuons")
+    #recoMuonInput = cms.InputTag("globalMuons")
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:singleMu2019WithGem_HLT.root')
+    fileNames = cms.untracked.vstring('file:singleMu2019_RECO.root')
     #fileNames = cms.untracked.vstring('file:singleMu2019_HLT.root')
 )
 
