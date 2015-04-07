@@ -7,6 +7,8 @@
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
@@ -18,6 +20,16 @@
 #include <DataFormats/DetId/interface/DetId.h>
 #include <DataFormats/MuonDetId/interface/MuonSubdetId.h>
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+#include <DataFormats/MuonDetId/interface/GEMDetId.h>
+#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
+
+#include <DataFormats/GEMRecHit/interface/GEMRecHit.h>
+#include "DataFormats/GEMRecHit/interface/GEMRecHitCollection.h"
+#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
+#include "SimDataFormats/Track/interface/SimTrackContainer.h"
+
+#include "TH1F.h"
+#include "TFile.h"
 
 class gemHLTAnalysis : public edm::EDAnalyzer {
 public:
@@ -35,6 +47,10 @@ private:
   edm::InputTag recoMuonInput_;
 
   int m_ngemHits,m_ntracks,m_ntracksWithGem;
+  edm::Service<TFileService> fs;
+  TH1F* h_gemRecHit;
+  TH1F* h_gemDigi;
+  
 };
 
 gemHLTAnalysis::gemHLTAnalysis(const edm::ParameterSet& iConfig)
@@ -61,7 +77,42 @@ gemHLTAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   Handle<reco::TrackCollection> muons;
   if (!iEvent.getByLabel(recoMuonInput_,muons)) return;
 
+  Handle<GEMRecHitCollection> gemRecHits; 
+  iEvent.getByLabel("gemRecHits", gemRecHits);
+  Handle<GEMDigiCollection> gemDigis;
+  iEvent.getByLabel("simMuonGEMDigis", gemDigis);
+
+  for(GEMDigiCollection::DigiRangeIterator cItr = gemDigis->begin(); cItr != gemDigis->end(); ++cItr){
+    GEMDetId id = (*cItr).first; 
+    cout << "gemSimHits region " << id.region()
+	 << " ring " << id.ring()
+	 << " station " << id.station()
+	 << " layer " << id.layer()
+	 << " chamber " << id.chamber()
+	 << " roll " << id.roll()
+	 << endl;
+    int r = id.layer();
+    if (id.station() == 2) r +=2;
+    h_gemDigi->Fill(id.region()*r);
+  }
   
+  for (GEMRecHitCollection::const_iterator recHit = gemRecHits->begin(); recHit != gemRecHits->end(); ++recHit){
+    GEMDetId id((*recHit).gemId());
+    cout << "gemRecHits region " << id.region()
+	 << " ring " << id.ring()
+	 << " station " << id.station()
+	 << " layer " << id.layer()
+	 << " chamber " << id.chamber()
+	 << " roll " << id.roll()
+	 << endl;
+    int r = id.layer();
+    if (id.station() == 2) r +=2;
+    h_gemRecHit->Fill(id.region()*r);
+  }
+
+    
+
+	
   for (const reco::Track & m: *muons){
     if (fabs(m.eta()) < 1.5 ) continue;
     if (fabs(m.eta()) > 2.5 ) continue;
@@ -110,6 +161,13 @@ gemHLTAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void 
 gemHLTAnalysis::beginJob()
 {
+  h_gemRecHit=fs->make<TH1F>("gemRecHitStation","gemRecHitStation",9,-4.5,4.5);
+  h_gemRecHit->GetXaxis()->SetTitle("station");
+  h_gemRecHit->GetYaxis()->SetTitle("Counts");
+  h_gemDigi=fs->make<TH1F>("gemDigiStation","gemDigiStation",9,-4.5,4.5);
+  h_gemDigi->GetXaxis()->SetTitle("station");
+  h_gemDigi->GetYaxis()->SetTitle("Counts");
+
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

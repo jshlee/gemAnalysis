@@ -6,4 +6,11 @@
 <use name="DataFormats/DetId"/>
 <use name="DataFormats/MuonDetId"/>
 <use name="DataFormats/TrackingRecHit"/>
+<use name="L1Trigger/CSCTrackFinder"/>
+<use name="CommonTools/UtilAlgos"/>
+<use name="DataFormats/CSCDigi"/>
+<use name="SimDataFormats/Track"/>
+<use name="SimDataFormats/TrackingHit"/>
+<use name="DataFormats/GEMRecHit"/>
+<use name="DataFormats/GEMDigi"/>
 <flags EDM_PLUGIN="1"/>
